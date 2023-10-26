@@ -18,6 +18,11 @@
       "type": "image/png"
     },
     {
+      "src": "/favicon.ico",
+      "sizes": "16x16",
+      "type": "image/ico"
+    },
+    {
       "src": "/mstile-150x-150.png",
       "sizes": "150x150",
       "type": "image/png"
