@@ -7,8 +7,8 @@ export const usePWA = () => {
     console.log(deferredPrompt.value);
 
     if (deferredPrompt.value) {
-      deferredPrompt?.prompt();
-      deferredPrompt.userChoice.then(choiceResult => {
+      deferredPrompt.value?.prompt();
+      deferredPrompt.value.userChoice.then(choiceResult => {
         if (choiceResult.outcome === 'accepted') {
           console.log('User accepted the installation');
         } else {
