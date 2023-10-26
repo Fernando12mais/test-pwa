@@ -1,10 +1,4 @@
 const messages = {
-  errorPromotionExpired:
-    'Error! Promotion expired for the items above. You can remove them to proceed with order completion.',
-  errorWhenFinishingOrder: 'Error when finishing order',
-  insufficientLimit: 'Insufficient limit',
-  errorMissingItemsInStock:
-    'Error! Insufficient stock for the items above. You can remove them to proceed with order completion.',
   installB2B: 'Install B2B',
   changeTheme: 'Change theme',
   changeLanguage: 'Change language',
@@ -87,7 +81,7 @@ const validation = {
     required: 'Please choose a payment method',
   },
   dueDate: {
-    required: 'Please choose a due',
+    required: 'Please choose a due date',
   },
   carrier: {
     required: 'Please choose a carrier',

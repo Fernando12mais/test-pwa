@@ -15,6 +15,7 @@
   const { handleSubmit, setErrors } = useForm({
     validationSchema: loginSchema,
   });
+  const { installPWA, isInstallable, getCameraAccess, stream } = usePWA();
 
   const { t } = useI18n<GlobalLocaleSchema>();
   const email = useField('email');
@@ -127,6 +128,23 @@
                 >
                   {{ t('login') }}
                 </VBtn>
+              </VCol>
+
+              <VCol v-if="isInstallable" cols="12">
+                <VBtn @click="installPWA"> Instalar app </VBtn>
+              </VCol>
+
+              <VCol cols="12">
+                <VBtn @click="getCameraAccess"> Acessar câmera </VBtn>
+              </VCol>
+
+              <VCol>
+                <video
+                  width="400"
+                  height="400"
+                  autoplay
+                  :srcObject="stream"
+                ></video>
               </VCol>
             </VRow>
           </VForm>

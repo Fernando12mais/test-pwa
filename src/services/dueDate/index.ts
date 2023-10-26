@@ -24,10 +24,16 @@ export const dueDateService = () => {
         const data = ctx.data as DueDateResponse;
         isFetchingDueDate.value = false;
         dueDate.value = data.map(item => ({
-          id: item.cdVencimento,
-          label: item.dsVencimento,
+          id: item.cdPessoa,
+          label: item.dsRazaoSocialNome,
         }));
+        //   const data = ctx.data as CarriersResponse;
 
+        //   const processedData: ProcessedCarrirerResponse = data.map(item => ({
+        //     id: item.cdPessoa,
+        //     label: item.dsRazaoSocialNome,
+        //   }));
+        //   ctx.data = processedData;
         return ctx;
       },
     });

@@ -1,9 +1,7 @@
 import { FormGeneratorProps } from '@/components/organisms/formGenerator/types';
 import { GlobalLocaleSchema } from '@/plugins/i18n/locales/locale.type';
 import { useProductsStore } from '@/stores/useProductsStore';
-import { useUserStore } from '@/stores/useUserStore';
 import { finishOrderSchema } from '@/validators/finishOrder';
-import { VChip } from 'vuetify/components';
 
 type Fields = Pick<
   FormGeneratorProps<'checkbox' | 'select', typeof finishOrderSchema>,
@@ -13,22 +11,15 @@ type Fields = Pick<
 type Field = Fields['fields'][0];
 
 type ComputedFields = Pick<
-  FormGeneratorProps<
-    'select' | 'checkbox' | 'custom',
-    typeof finishOrderSchema,
-    'finishedOrder' | 'goBack'
-  >,
-  'actions' | 'fields' | 'errorMessage'
+  FormGeneratorProps<'select' | 'checkbox', typeof finishOrderSchema>,
+  'actions' | 'fields'
 >;
 
 export const useFinishOrder = () => {
   const { t } = useI18n<GlobalLocaleSchema>();
   const productStore = useProductsStore();
-  const userStore = useUserStore();
   const { getPaymentForms, getDueDate, getCarriers, finishOrder, updateOrder } =
     productStore;
-
-  const { getCreditLimit } = userStore;
 
   const {
     order,
@@ -54,8 +45,8 @@ export const useFinishOrder = () => {
     computed(
       () =>
         paymentForms.value?.map(item => ({
-          value: item?.id?.toString(),
-          label: item?.label,
+          value: item.id.toString(),
+          label: item.label,
         })),
     ) || [];
 
@@ -63,8 +54,8 @@ export const useFinishOrder = () => {
     computed(
       () =>
         dueDate.value?.map(item => ({
-          value: item.id?.toString(),
-          label: item?.label,
+          value: item.id.toString(),
+          label: item.label,
         })),
     ) || [];
 
@@ -72,7 +63,7 @@ export const useFinishOrder = () => {
     computed(
       () =>
         carriers.value?.map(item => ({
-          value: item.id?.toString(),
+          value: item.id.toString(),
           label: item.label,
         })),
     ) || [];
@@ -80,10 +71,8 @@ export const useFinishOrder = () => {
   const getOnSite = ref<Field>({
     id: 'getOnSite',
     type: 'checkbox',
-    cols: 6,
     props: {
       label: t('messages.pickUpAtTheCounter'),
-      value: false,
     },
   });
 
@@ -108,7 +97,16 @@ export const useFinishOrder = () => {
   });
 
   const data = computed<ComputedFields>(() => ({
-    errorMessage: orderFinishError?.value?.message,
+    actions: [
+      {
+        id: 'finishOrder',
+        label: t('messages.finishOrder'),
+        color: 'success',
+        cols: 12,
+        type: 'submit',
+        loading: isFetchingOrderFinish.value,
+      },
+    ],
     fields: [
       {
         id: 'paymentForm',
@@ -125,7 +123,7 @@ export const useFinishOrder = () => {
 
       {
         cols: 12,
-        md: true,
+        md: 6,
         id: 'dueDate',
         type: 'select',
         props: {
@@ -133,16 +131,6 @@ export const useFinishOrder = () => {
           label: dueDateValue.value.props.label,
           value: dueDateValue.value.props.value as string,
           loading: isFetchingDueDate.value,
-        },
-      },
-      {
-        id: 'nfe',
-        type: 'custom',
-        cols: 'auto',
-
-        props: {
-          class: 'd-none d-md-flex align-center',
-          component: <VChip variant="elevated" text="NFE" />,
         },
       },
       {
@@ -158,41 +146,9 @@ export const useFinishOrder = () => {
           loading: isFetchingCarriers.value,
         },
       },
-
-      {
-        id: 'getOnSite',
-        type: 'checkbox',
-        cols: 6,
-        props: {
-          label: t('messages.pickUpAtTheCounter'),
-          value: getOnSite.value.props.value as boolean,
-        },
-      },
-    ],
-
-    actions: [
-      {
-        id: 'finishedOrder',
-        label: t('messages.sendOrder'),
-        color: 'success',
-        cols: 'auto',
-        class: 'ms-auto',
-        type: 'submit',
-        loading: isFetchingOrderFinish.value,
-      },
-      {
-        id: 'goBack',
-        class: 'mr-auto',
-        label: t('back'),
-        color: 'error',
-        cols: 'auto',
-        variant: 'outlined',
-        loading: isFetchingOrderFinish.value,
-      },
+      getOnSite.value,
     ],
   }));
-
-  const isFetchingFields = ref(false);
 
   const onPaymentFormChange = (id: number) => {
     getDueDate(id);
@@ -204,7 +160,6 @@ export const useFinishOrder = () => {
     carrier.value.props.disabled = value;
   };
   const updateField = (field: string, value: any) => {
-    if (isFetchingFields.value) return;
     if (field == 'paymentForm') {
       paymentForm.value.props.value = value;
       updateOrder({ cdFormaPagamento: Number(value) });
@@ -226,25 +181,19 @@ export const useFinishOrder = () => {
     }
   };
 
-  const getFieldValues = async () => {
+  const getFieldValues = () => {
     if (!order.value) return;
-    getCreditLimit();
-    orderFinishError.value = {};
 
-    isFetchingFields.value = true;
+    getDueDate(order.value.paymentFormId).then(() => {
+      if (dueDateValue.value.type !== 'select') return;
 
-    if (order.value.paymentFormId) {
-      getDueDate(order.value.paymentFormId).then(() => {
-        if (dueDateValue.value.type !== 'select') return;
+      const defaultValue = dueDate.value.find(
+        item => item.id == order.value?.dueDateId,
+      );
 
-        const defaultValue = dueDate.value.find(
-          item => item.id == order.value?.dueDateId,
-        );
-
-        if (!defaultValue) return;
-        dueDateValue.value.props.value = defaultValue.label;
-      });
-    }
+      if (!defaultValue) return;
+      dueDateValue.value.props.value = defaultValue.label;
+    });
     getPaymentForms().then(() => {
       if (paymentForm.value.type !== 'select') return;
 
@@ -256,7 +205,7 @@ export const useFinishOrder = () => {
       paymentForm.value.props.value = defaultValue.label;
     });
 
-    await getCarriers().then(() => {
+    getCarriers().then(() => {
       if (carrier.value.type !== 'select') return;
 
       const defaultValue = carriers.value?.find(
@@ -268,9 +217,6 @@ export const useFinishOrder = () => {
     });
 
     getOnSite.value.props.value = !!order.value.getOnSite;
-
-    if (getOnSite.value.props.value) carrier.value.props.disabled = true;
-    isFetchingFields.value = false;
   };
 
   return {

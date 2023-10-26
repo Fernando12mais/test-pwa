@@ -21,7 +21,7 @@
     onAction: (action: { action: K; data: output<P> }) => true,
     onFieldUpdate: (data: { id: keyof P['_input']; value: unknown }) => true,
   });
-  const { handleSubmit, setFieldValue, resetForm } = useForm({
+  const { handleSubmit, setFieldValue } = useForm({
     validationSchema: toTypedSchema(props.schema),
   });
   const { t } = useI18n<GlobalLocaleSchema>();
@@ -72,13 +72,11 @@
 </script>
 
 <template>
-  <VForm @submit.prevent="onSubmit" class="py-3">
+  <VForm @submit.prevent="onSubmit">
     <VRow>
       <VCol
-        :style="{ height: field.type == 'custom' ? '4.5rem' : 'auto' }"
         v-for="(field, index) in fields"
         :key="index"
-        :class="field.props.class ? field.props.class : 'd-flex align-center'"
         :cols="field.cols"
         :sm="field.sm"
         :md="field.md"
@@ -93,7 +91,6 @@
               : field.props.loading
           "
           height="48"
-          width="100%"
         />
         <TextFieldRoot
           v-else-if="field.type == 'input'"
@@ -102,21 +99,14 @@
           <TextFieldInput
             v-bind="field.props.input"
             @on-input="updateAndEmitField(index, $event, field.id.toString())"
-            :default-value="fieldsRefs[index].value.value as string"
-            :error-messages="
-              fieldsRefs[index].errorMessage.value
-                ? t(fieldsRefs[index].errorMessage.value as string)
-                : undefined
-            "
+            :default-value="fieldsRefs[index].value.value"
+            :error-messages="t(fieldsRefs[index].errorMessage.value || '')"
           />
         </TextFieldRoot>
 
         <VSelect
           style="border-radius: 6px"
-          :class="{
-            elevate: !fieldsRefs[index].errorMessage.value,
-            'text-start': fieldsRefs[index].errorMessage.value,
-          }"
+          :class="{ elevate: !fieldsRefs[index].errorMessage.value }"
           density="comfortable"
           persistent-placeholder
           v-else-if="field.type == 'select'"
@@ -127,33 +117,20 @@
           @update:model-value="
             updateAndEmitField(index, $event, field.id.toString())
           "
-          :error-messages="
-            fieldsRefs[index].errorMessage.value
-              ? t(fieldsRefs[index].errorMessage.value as string)
-              : undefined
-          "
+          :error-messages="t(fieldsRefs[index].errorMessage.value || '')"
         />
 
         <VCheckbox
           v-else-if="field.type == 'checkbox'"
           :model-value="fieldsRefs[index].value.value"
           :label="field.props.label"
-          :class="{
-            'text-start': fieldsRefs[index].errorMessage.value,
-          }"
           @update:model-value="
             updateAndEmitField(index, $event, field.id.toString())
           "
         />
-
-        <Component
-          v-else-if="field?.type == 'custom'"
-          :is="field.props.component"
-        />
       </VCol>
 
       <VCol
-        :class="action.class"
         v-for="action in actions"
         :key="action.id"
         :cols="action.cols"
@@ -164,18 +141,14 @@
         :xxl="action.xxl"
       >
         <VBtn
-          v-bind="action"
           :disabled="action.loading"
           :loading="action.loading"
           @click="emitAction(action.id)"
-          :type="action.type || 'button'"
+          :type="action.type"
           :color="action.color || 'primary'"
         >
           {{ action.label }}
         </VBtn>
-      </VCol>
-      <VCol v-if="errorMessage" :cols="12">
-        <p class="text-error">{{ t(errorMessage) }}</p>
       </VCol>
     </VRow>
   </VForm>

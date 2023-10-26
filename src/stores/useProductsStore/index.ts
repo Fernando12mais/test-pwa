@@ -11,7 +11,7 @@ import { carriersService } from '@/services/carriers';
 import { dueDateService } from '@/services/dueDate';
 import { searchPropertiesService } from '@/services/searchProperties';
 import { vehiclePlateService } from '@/services/vehiclePlate';
-import { ProcessedOrder } from '@/services/ordersFinished/types';
+import { Order, ProcessedOrder } from '@/services/ordersFinished/types';
 import { OrderCreatePayload } from '@/services/orderCreate/types';
 import { orderDeleteService } from '@/services/orderDelete';
 import { orderFinishService } from '@/services/orderFinish';

@@ -16,7 +16,6 @@
     {
       logoAlt: string;
       image?: string;
-      available: boolean;
       highlight?: Partial<Omit<HighlightableProps, 'original'>>;
     } & HighlightableProps
   >();

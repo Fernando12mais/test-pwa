@@ -12,17 +12,17 @@ export default [
     subject: 'client',
   },
 
-  // {
-  //   title: 'credit',
-  //   icon: { icon: 'tabler-coins' },
-  //   to: 'client-credit',
-  //   subject: 'client',
-  // },
+  {
+    title: 'credit',
+    icon: { icon: 'tabler-coins' },
+    to: 'client-credit',
+    subject: 'client',
+  },
 
-  // {
-  //   title: 'financial',
-  //   icon: { icon: 'tabler-coins' },
-  //   to: 'client-financial',
-  //   subject: 'client',
-  // },
+  {
+    title: 'financial',
+    icon: { icon: 'tabler-coins' },
+    to: 'client-financial',
+    subject: 'client',
+  },
 ];

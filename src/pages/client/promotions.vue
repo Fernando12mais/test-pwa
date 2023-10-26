@@ -146,13 +146,6 @@
             >
               <TextFieldRoot :loading="false">
                 <TextFieldInput
-                  @blur="
-                    if (
-                      !formValues[index]?.available &&
-                      formValues[index].value
-                    )
-                      verify(index);
-                  "
                   :id="`id-${index}`"
                   @on-key-down="handleKeyNavigation($event, index)"
                   density="compact"
@@ -194,6 +187,10 @@
                     !formValues[index]?.available ||
                     formValues[index].isFetching,
                 }"
+                @focusin="
+                  if (!formValues[index]?.available && formValues[index].value)
+                    verify(index);
+                "
                 size="small"
                 class="px-1"
                 style="font-size: 0.75rem"

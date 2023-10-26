@@ -1,12 +1,6 @@
 import { LocaleSchema } from './locale.type';
 
 const messages: LocaleSchema['messages'] = {
-  errorPromotionExpired:
-    'Erro! Promoção expirada para os itens acima, você pode remove-los para prosseguir com a finalização do pedido.',
-  errorWhenFinishingOrder: 'Erro ao finalizar o pedido',
-  insufficientLimit: 'Limite Insuficiente. Entre em contato com seu vendedor.',
-  errorMissingItemsInStock:
-    'Erro! Estoque insuficiente para os itens acima, você pode remove-los para prosseguir com a finalização do pedido.',
   installB2B: 'Instalar B2B',
   changeTheme: 'Alterar tema',
   changeLanguage: 'Alterar idioma',
@@ -89,7 +83,7 @@ const validation: LocaleSchema['validation'] = {
     required: 'Por favor, escolha um método de pagamento',
   },
   dueDate: {
-    required: 'Por favor, escolha um vencimento',
+    required: 'Por favor, escolha uma data de vencimento',
   },
   carrier: {
     required: 'Por favor, escolha uma transportadora',

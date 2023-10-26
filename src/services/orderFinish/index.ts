@@ -1,7 +1,6 @@
 import { useToastStore } from '@/stores/useToastStore';
 import { useFetchAPI } from '../api';
 import { OrderFinishResponse, ProcessedOrderFinishResponse } from './types';
-import { useUserStore } from '@/stores/useUserStore';
 
 export const orderFinishService = () => {
   const {
@@ -18,44 +17,26 @@ export const orderFinishService = () => {
       };
 
       ctx.error = processedError;
-
-      const errorCases: Record<
-        Exclude<ProcessedOrderFinishResponse['error'], undefined>,
-        () => void
-      > = {
-        GENERIC_ERROR: () => {
-          ctx.error.message = 'messages.errorWhenFinishingOrder';
-        },
-        LIMIT_INSUFICIENT: () => {
-          ctx.error.message = 'messages.insufficientLimit';
-        },
-        STOCK_INSUFICIENT: () => {
-          ctx.error.message = `messages.errorMissingItemsInStock`;
-        },
-        PROMOTION_EXPIRED: () => {
-          ctx.error.message = 'messages.errorPromotionExpired';
-        },
-      };
-
-      if (processedError.error) errorCases[processedError.error]();
+      if (processedError.error == 'LIMIT_INSUFICIENT') {
+        ctx.error.message = 'Limite insuficiente';
+      }
+      if (processedError.error == 'STOCK_INSUFICIENT') {
+        ctx.error.message = `Erro! Itens em falta no estoque`;
+      }
 
       return ctx;
     },
   });
   const { toast } = useToastStore();
-  const { getCreditLimit } = useUserStore();
 
   const finishOrder = async () => {
     await get()
       ?.json()
       .execute(true)
       .then(() => {
-        getCreditLimit();
         toast({ message: 'Pedido enviado com sucesso!', color: 'success' });
       })
-      .catch(err => {
-        console.error(err);
-      });
+      .catch(err => console.error(err));
   };
 
   return {

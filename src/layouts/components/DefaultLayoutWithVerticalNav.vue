@@ -51,14 +51,10 @@
   const onSubmit = async () => {
     await finishOrder();
     isSendModalOpen.value = false;
-    isCartOpen.value = false;
   };
   const handleSendBtn = () => {
     isSendModalOpen.value = true;
     getFieldValues();
-  };
-  const closeModal = () => {
-    isSendModalOpen.value = false;
   };
 
   onBeforeMount(() => {
@@ -163,7 +159,7 @@
       <VRow class="mt-auto">
         <VCol cols="12">
           <p class="text-error text-center ma-0" style="min-height: 16px">
-            {{ orderFinishError?.message ? t(orderFinishError?.message) : '' }}
+            {{ orderFinishError?.message }}
           </p>
         </VCol>
         <VCol>
@@ -209,7 +205,7 @@
       </VRow>
 
       <DialogRoot :is-open="isSendModalOpen">
-        <DialogClose @click="closeModal" />
+        <DialogClose @click="isSendModalOpen = false" />
 
         <DialogContent title="Finalizar pagamento">
           <FormGenerator
@@ -221,11 +217,6 @@
             :schema="finishOrderSchema"
             @on-submit="onSubmit"
             @on-field-update="updateField($event.id, $event.value)"
-            @on-action="
-              if ($event.action == 'goBack') {
-                closeModal();
-              }
-            "
           />
         </DialogContent>
       </DialogRoot>

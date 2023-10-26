@@ -18,7 +18,6 @@
   import { OrderCreatePayload } from '@services/orderCreate/types';
   import { useDisplay } from 'vuetify/lib/framework.mjs';
   import { formatVehiclePlate, formatCreditCard } from '@utils/masks';
-  import { useFinishOrder } from '@/composables/useFinishOrder';
 
   const ProductsStore = useProductsStore();
 
@@ -44,6 +43,7 @@
     isFetchingDeleteOrder,
     highlightOrderText,
     orderFinishStatusCode,
+    orderFinishError,
   } = storeToRefs(ProductsStore);
 
   const {
@@ -59,6 +59,7 @@
     getProperties,
     getVehiclePlate,
     deleteOrder,
+    finishOrder,
     updateOrder,
   } = ProductsStore;
 
@@ -96,14 +97,6 @@
   const { handleSubmit, resetForm } = useForm({
     validationSchema: productSearchSchema,
   });
-  const {
-    sendOrderFormData,
-    finishOrderSchema,
-    getFieldValues,
-    updateField,
-    finishOrder,
-    orderFinishError,
-  } = useFinishOrder();
   const generalSearch = useField<string>('generalSearch');
   const brand = useField<string>('brand');
   const side = useField<string>('side');
@@ -382,14 +375,6 @@
     }
   }
 
-  const handleSendOrder = async () => {
-    await finishOrder().then(() => {
-      if (orderFinishStatusCode.value == 200) {
-        isSendModalOpen.value = false;
-      }
-    });
-  };
-
   onBeforeMount(() => {
     getOpenOrder();
     getProperties();
@@ -399,8 +384,25 @@
   });
 
   const handleSend = () => {
-    getFieldValues();
+    if (!order.value) return;
+
+    pickupAtCounter.value = !!order.value.getOnSite;
     isSendModalOpen.value = true;
+    getDueDate(order.value.paymentFormId).then(() => {
+      dueDateValue.value =
+        dueDate.value.find(item => item.id == order.value?.dueDateId)?.label ||
+        '';
+    });
+    getPaymentForms().then(() => {
+      paymentValue.value =
+        paymentForms.value?.find(item => order.value?.paymentFormId == item.id)
+          ?.label || '';
+    });
+    getCarriers().then(() => {
+      carrierValue.value =
+        carriers.value?.find(item => order.value?.carrierId == item.id)
+          ?.label || '';
+    });
   };
   const applyFilters = async () => {
     isDrawerOpen.value = false;
@@ -655,10 +657,63 @@
                 style="overflow: hidden"
               >
                 <VRow class="my-0">
+                  <!-- <VCol cols="12" md="2">
+                    <VCard
+                      class="px-4 py-2"
+                      style="
+                        overflow: visible;
+                        cursor: default;
+                        background-color: rgb(var(--v-theme-grey-200));
+                      "
+                    >
+                      <h5 class="font-weight-bold">
+                        {{ t('messages.searchVehicleByLicensePlate') }}
+                      </h5>
+
+                      <TextFieldRoot
+                        class="position-relative"
+                        :loading="
+                          isSearchingProduct.search || isFetchingVehiclePlate
+                        "
+                      >
+                        <TextFieldInput
+                          type="search"
+                          class="upper"
+                          label-on-top
+                          label=""
+                          :error-messages="
+                            plate.errorMessage.value &&
+                            t(plate.errorMessage.value)
+                          "
+                          @on-input="plate.value.value = $event"
+                          :clearable="false"
+                          placeholder="AAA-9999"
+                          :masks="[formatVehiclePlate]"
+                          append-inner-icon="tabler-search"
+                          :default-value="params.plate?.toString()"
+                        />
+
+                        <VBtn
+                          style="
+                            position: absolute;
+                            right: 10px;
+                            top: 24px;
+                            translate: 0 -50%;
+                          "
+                          @click="onSubmitPlate"
+                          size="28"
+                          type="submit"
+                          prepend-icon="tabler-search"
+                          :disabled="isSearchingProduct.search"
+                          :loading="isSearchingProduct.search"
+                        />
+                      </TextFieldRoot>
+                    </VCard>
+                  </VCol> -->
                   <VCol>
                     <VRow class="px-1 py-0 position-relative">
                       <VCol cols="12" :md="4">
-                        <TextFieldRoot :loading="!!isSearchingProduct.search">
+                        <TextFieldRoot :loading="!!!!isSearchingProduct.search">
                           <TextFieldInput
                             type="search"
                             class="upper"
@@ -858,13 +913,10 @@
           <VRow v-for="product in list" :key="product.index">
             <VCol class="d-flex flex-column">
               <ProductCardRoot
-                :class="{
-                  'highlight-bg': product.data.isSimilar,
-                }"
+                :class="{ 'highlight-bg': product.data.isSimilar }"
                 :loading="page == 1 && !!isSearchingProduct.search"
               >
                 <ProductCardHeader
-                  :available="!!product.data.isAvailable"
                   :highlight="{
                     title: params.generalSearch as string,
                     side: params.side as string,
@@ -904,7 +956,6 @@
                 />
 
                 <ProductCardForm
-                  :available="!!product.data.isAvailable"
                   :default-value="
                     Number(
                       order?.itens.find(item => item.id == product.data.id)
@@ -1101,12 +1152,7 @@
       <DialogClose @on-close="isSendModalOpen = false" />
 
       <DialogContent title="">
-        <SkeletonRoot
-          v-if="isFetchingCreditLimit"
-          :height="44"
-          :width="110"
-          class="mb-3 ms-auto mr-3"
-        />
+        <SkeletonRoot v-if="isFetchingCreditLimit" :height="44" :width="110" />
 
         <InfoCardRoot
           v-else-if="!userStore.isAdmin && creditLimit?.limitAvailable"
@@ -1167,148 +1213,124 @@
           </tr>
         </TableExpandableRoot>
 
-        <VRow class="d-flex flex-column gap-3 mt-3">
-          <VCol>
-            <TableExpandableRoot :loading="false">
-              <template #header>
-                <th class="short text-center">{{ t('number') }}</th>
-                <th class="text-center">{{ t('date') }}</th>
-                <th class="short">{{ t('messages.qtdItem') }}</th>
-                <th class="short text-center">{{ t('messages.qtdUnit') }}</th>
-                <th class="short text-center">{{ t('total') }}</th>
-              </template>
-              <tr v-if="order">
-                <TableExpandableItem>{{ order?.id }}</TableExpandableItem>
-                <TableExpandableItem>{{
-                  format(order.createdAt, 'dd/MM/yyyy HH:mm:ss')
-                }}</TableExpandableItem>
-                <TableExpandableItem>{{
-                  order?.quantity || order?.quantity
-                }}</TableExpandableItem>
-                <TableExpandableItem>{{
-                  order?.totalQuantity || order?.totalQuantity
-                }}</TableExpandableItem>
-                <TableExpandableItem class="text-end">{{
-                  formatMoney(Number(order?.total || order?.total))
-                }}</TableExpandableItem>
-              </tr>
-            </TableExpandableRoot>
+        <VForm @submit.prevent class="d-flex flex-column gap-3 mt-3">
+          <TableExpandableRoot :loading="false">
+            <template #header>
+              <th class="short text-center">{{ t('number') }}</th>
+              <th class="text-center">{{ t('date') }}</th>
+              <th class="short">{{ t('messages.qtdItem') }}</th>
+              <th class="short text-center">{{ t('messages.qtdUnit') }}</th>
+              <th class="short text-center">{{ t('total') }}</th>
+            </template>
+            <tr v-if="order">
+              <TableExpandableItem>{{ order?.id }}</TableExpandableItem>
+              <TableExpandableItem>{{
+                format(order.createdAt, 'dd/MM/yyyy HH:mm:ss')
+              }}</TableExpandableItem>
+              <TableExpandableItem>{{
+                order?.quantity || order?.quantity
+              }}</TableExpandableItem>
+              <TableExpandableItem>{{
+                order?.totalQuantity || order?.totalQuantity
+              }}</TableExpandableItem>
+              <TableExpandableItem class="text-end">{{
+                formatMoney(Number(order?.total || order?.total))
+              }}</TableExpandableItem>
+            </tr>
+          </TableExpandableRoot>
 
-            <VCard class="mt-3">
-              <VRow>
-                <VCol>
-                  <FormGenerator
-                    :height="400"
-                    class="mt-4 px-3"
-                    v-bind="sendOrderFormData"
-                    :actions="sendOrderFormData.actions"
-                    :fields="sendOrderFormData.fields"
-                    :schema="finishOrderSchema"
-                    @on-submit="handleSendOrder"
-                    @on-field-update="updateField($event.id, $event.value)"
-                    @on-action="
-                      if ($event.action == 'goBack') {
-                        isSendModalOpen = false;
-                      }
-                    "
-                  />
-                </VCol>
-              </VRow>
-            </VCard>
+          <SkeletonRoot
+            v-if="isFetchingCarriers || isFetchingPaymentForm"
+            :height="125"
+          />
 
-            <!-- <SkeletonRoot
-              v-if="isFetchingCarriers || isFetchingPaymentForm"
-              :height="125"
-            /> -->
-
-            <!-- <VCard v-else class="py-2 px-3 my-3" style="overflow: visible">
-              <RowRoot class="d-flex gap-3">
-                <VCol>
-                  <VSelect
-                    @update:model-value="handleDueDate($event)"
-                    v-model="paymentValue"
-                    density="comfortable"
-                    :items="paymentForms"
-                    :label="t('messages.paymentForm')"
-                    item-title="label"
-                    item-value="id"
-                  />
-                </VCol>
-                <VCol>
-                  <SkeletonRoot v-if="isFetchingDueDate" :height="48" />
-                  <VSelect
-                    :disabled="!dueDateLabels.length"
-                    v-else
-                    v-model="dueDateValue"
-                    @update:model-value="updateOrder({ cdVencimento: $event })"
-                    density="comfortable"
-                    :items="dueDate"
-                    item-title="label"
-                    item-value="id"
-                    :label="t('dueDate')"
-                    hide-no-data
-                  />
-                </VCol>
-                <VCol cols="auto" class="d-flex justify-center align-center">
-                  <VChip variant="elevated"> NFE </VChip>
-                </VCol>
-              </RowRoot>
-              <RowRoot class="mt-3 d-flex gap-3 align-center">
-                <VCol cols="4">
-                  <VSelect
-                    :disabled="pickupAtCounter"
-                    v-model="carrierValue"
-                    @update:model-value="
-                      console.log($event);
-                      updateOrder({ cdTransportadora: Number($event) });
-                    "
-                    density="comfortable"
-                    :items="carriers"
-                    item-title="label"
-                    item-value="id"
-                    :label="t('carrier')"
-                  />
-                </VCol>
-
-                <VCol>
-                  <VCheckbox
-                    @update:model-value="updateOrder({ flRetira: $event })"
-                    v-model="pickupAtCounter"
-                    :label="t('messages.pickUpAtTheCounter')"
-                  />
-                </VCol>
-              </RowRoot>
-            </VCard> -->
-
-            <!-- <RowRoot class="d-flex flex-wrap justify-center gap-3">
-              <VCol cols="auto">
-                <VBtn
-                  @click="
-                    finishOrder().then(() => {
-                      if (orderFinishStatusCode == 200) {
-                        isSendModalOpen = false;
-                      }
-                    })
+          <VCard v-else class="py-2 px-3" style="overflow: visible">
+            <RowRoot class="d-flex gap-3">
+              <VCol>
+                <VSelect
+                  @update:model-value="handleDueDate($event)"
+                  v-model="paymentValue"
+                  density="comfortable"
+                  :items="paymentForms"
+                  :label="t('messages.paymentForm')"
+                  item-title="label"
+                  item-value="id"
+                />
+              </VCol>
+              <VCol>
+                <SkeletonRoot v-if="isFetchingDueDate" :height="48" />
+                <VSelect
+                  :disabled="!dueDateLabels.length"
+                  v-else
+                  v-model="dueDateValue"
+                  @update:model-value="updateOrder({ cdVencimento: $event })"
+                  density="comfortable"
+                  :items="dueDate"
+                  item-title="label"
+                  item-value="id"
+                  :label="t('dueDate')"
+                  hide-no-data
+                />
+              </VCol>
+              <VCol cols="auto" class="d-flex justify-center align-center">
+                <VChip variant="elevated"> NFE </VChip>
+              </VCol>
+            </RowRoot>
+            <RowRoot class="mt-3 d-flex gap-3 align-center">
+              <VCol cols="4">
+                <VSelect
+                  :disabled="pickupAtCounter"
+                  v-model="carrierValue"
+                  @update:model-value="
+                    console.log($event);
+                    updateOrder({ cdTransportadora: Number($event) });
                   "
-                  color="success"
-                  >{{ t('messages.sendOrder') }}</VBtn
-                >
+                  density="comfortable"
+                  :items="carriers"
+                  item-title="label"
+                  item-value="id"
+                  :label="t('carrier')"
+                />
+              </VCol>
 
-                <p class="text-error mt-3">
-                  {{ orderFinishError?.message }}
-                </p>
+              <VCol>
+                <VCheckbox
+                  @update:model-value="updateOrder({ flRetira: $event })"
+                  v-model="pickupAtCounter"
+                  :label="t('messages.pickUpAtTheCounter')"
+                />
               </VCol>
-              <VCol cols="auto">
-                <VBtn
-                  color="error"
-                  variant="outlined"
-                  @click="isSendModalOpen = false"
-                  >{{ t('back') }}</VBtn
-                >
-              </VCol>
-            </RowRoot> -->
-          </VCol>
-        </VRow>
+            </RowRoot>
+          </VCard>
+
+          <RowRoot class="d-flex flex-wrap justify-center gap-3">
+            <VCol cols="auto">
+              <VBtn
+                @click="
+                  finishOrder().then(() => {
+                    if (orderFinishStatusCode == 200) {
+                      isSendModalOpen = false;
+                    }
+                  })
+                "
+                color="success"
+                >{{ t('messages.sendOrder') }}</VBtn
+              >
+
+              <p class="text-error mt-3">
+                {{ orderFinishError?.message }}
+              </p>
+            </VCol>
+            <VCol cols="auto">
+              <VBtn
+                color="error"
+                variant="outlined"
+                @click="isSendModalOpen = false"
+                >{{ t('back') }}</VBtn
+              >
+            </VCol>
+          </RowRoot>
+        </VForm>
       </DialogContent>
     </DialogRoot>
   </VRow>

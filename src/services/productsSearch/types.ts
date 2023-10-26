@@ -19,7 +19,6 @@ export type ProductsSearchResponse = {
     nrItemSimilar: number;
     similares: number[];
     txUrlImagemTecnica: string;
-    flDisponivel: boolean;
   }[];
   tipos: { cdTipo: number; dsTipo: string }[];
   subDescricoes?: { dsSubDescricao: string }[];
@@ -70,7 +69,6 @@ export type ProcessedProductsResponse = {
     isBuying?: boolean;
     similarIndex?: number;
     technicalPicture: Product['txUrlImagemTecnica'];
-    isAvailable?: Product['flDisponivel'];
   }[];
   types: FilterOption[];
   subDescriptions: FilterOption[] | undefined;

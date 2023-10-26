@@ -6,7 +6,6 @@ export const finishOrderSchema = z.object({
     .nonempty('validation.paymentForm.required')
     .default(''),
   dueDate: z.string().nonempty('validation.dueDate.required').default(''),
-  carrier: z.string().default(''),
+  carrier: z.string().nonempty('validation.carrier.required').default(''),
   getOnSite: z.boolean().default(false),
-  nfe: z.null().default(null),
 });

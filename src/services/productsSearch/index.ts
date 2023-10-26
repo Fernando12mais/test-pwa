@@ -91,7 +91,6 @@ export const productsSearchService = () => {
             similarItems: [],
             isSimilar: false,
             technicalPicture: item.txUrlImagemTecnica,
-            isAvailable: item.flDisponivel,
           })),
           types: data.tipos.map(item => ({
             title: item.dsTipo,
@@ -219,7 +218,6 @@ export const productsSearchService = () => {
           isSimilar: true,
           similarIndex: similarIndex + 1,
           technicalPicture: item.txUrlImagemTecnica,
-          isAvailable: item.flDisponivel,
         }));
 
       items.forEach(

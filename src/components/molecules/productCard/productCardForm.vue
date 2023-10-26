@@ -16,7 +16,6 @@
     index: number;
     defaultValue?: number;
     loading?: boolean;
-    available: boolean;
   }>();
 
   const { data } = storeToRefs(useProductsStore());
@@ -48,17 +47,6 @@
   const { t } = useI18n<GlobalLocaleSchema>();
 
   const { mdAndUp } = useDisplay();
-
-  const handleBlur = () => {
-    if (!availability.value?.disponivel && quantity.value && mdAndUp.value) {
-      verifyAvailability({
-        cdEmpresa: UserStore?.userData?.user?.cdEmpresa as number,
-        cdItem: props.id,
-        nrQuantidade: quantity.value,
-      });
-      verified.value = true;
-    }
-  };
 </script>
 
 <template>
@@ -100,12 +88,9 @@
         <VCol class="d-flex flex-column justify-center" cols="6" md="auto">
           <TextFieldRoot :loading="false" style="min-width: 100px">
             <TextFieldInput
-              :disabled="!available"
-              @blur="handleBlur"
               focused
               :default-value="defaultValue ? defaultValue.toString() : ''"
               class="input-center input-focused"
-              :class="{ 'bg-surface': available }"
               @on-key-down="onKeyDown($event.toLowerCase())"
               :id="`id-${index}`"
               :clearable="false"
@@ -129,12 +114,19 @@
               if (availability?.disponivel) manageCreateOrder();
               else onSubmit();
             "
+            @focusin="
+              if (!availability?.disponivel && quantity && mdAndUp) {
+                verifyAvailability({
+                  cdEmpresa: UserStore?.userData?.user?.cdEmpresa as number,
+                  cdItem: props.id,
+                  nrQuantidade: quantity,
+                });
+                verified = true;
+              }
+            "
             :loading="isVerifyingAvailability || loading"
             :color="
-              (!availability?.disponivel &&
-                verified &&
-                !isVerifyingAvailability) ||
-              !available
+              !availability?.disponivel && verified && !isVerifyingAvailability
                 ? 'error'
                 : 'success'
             "
@@ -163,7 +155,7 @@
               style="text-transform: uppercase !important"
             >
               {{
-                (!availability?.disponivel && verified) || !available
+                !availability?.disponivel && verified
                   ? t('unavailable')
                   : t('buy')
               }}

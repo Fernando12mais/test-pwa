@@ -4,7 +4,7 @@
   import { hexToRgb } from '@layouts/utils';
   import { configService } from '@services/config/index';
   import { ConfigResponse } from '@services/config/types';
-
+ 
   import { useUserConfigStore } from '@stores/useUserConfigStore';
   import { useToastStore } from '@stores/useToastStore';
 
@@ -27,10 +27,8 @@
   syncConfigThemeWithVuetifyTheme();
 
   configService.get().then(() => {
-    if (!configService.data.value || configService.statusCode.value == 204) {
-      localStorage.removeItem('config');
-      return;
-    }
+    if (!configService.data.value) return;
+
     const data = JSON.parse(
       configService.data.value as string,
     ) as ConfigResponse;

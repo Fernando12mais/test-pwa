@@ -1,9 +1,9 @@
 export type DueDateResponse = {
-  cdVencimento: number;
-  dsVencimento: string;
+  cdPessoa: number;
+  dsRazaoSocialNome: string;
 }[];
 
 export type ProcesseDueDateResponse = {
-  id: DueDateResponse[0]['cdVencimento'];
-  label: DueDateResponse[0]['dsVencimento'];
+  id: DueDateResponse[0]['cdPessoa'];
+  label: DueDateResponse[0]['dsRazaoSocialNome'];
 }[];

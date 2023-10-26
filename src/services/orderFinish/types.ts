@@ -1,9 +1,5 @@
 export type OrderFinishResponse = {
-  error?:
-    | 'LIMIT_INSUFICIENT'
-    | 'STOCK_INSUFICIENT'
-    | 'GENERIC_ERROR'
-    | 'PROMOTION_EXPIRED';
+  error?: 'LIMIT_INSUFICIENT' | 'STOCK_INSUFICIENT';
   cdPedidoItem?: number[];
 };
 
