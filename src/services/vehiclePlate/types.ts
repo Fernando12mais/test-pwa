@@ -1,0 +1,32 @@
+export type VehiclePlateResponse = {
+  dsMarca: string;
+  flGenérico: boolean;
+  dsModelo: string;
+  flImportado: boolean;
+  nrAno: number;
+  nrAnoModelo: number;
+  dsCor: string;
+  nrCilindrada: number;
+  nrPotencia: number;
+  dsCombustível: string;
+  dsChassi: string;
+  dsMotor: string;
+  nrPassageiros: number;
+  dsUf: string;
+};
+export type ProcessedVehiclePlateResponse = {
+  brand: VehiclePlateResponse['dsMarca'];
+  generic: VehiclePlateResponse['flGenérico'];
+  imported: VehiclePlateResponse['flImportado'];
+  year: VehiclePlateResponse['nrAno'];
+  modelYear: VehiclePlateResponse['nrAnoModelo'];
+  color: VehiclePlateResponse['dsCor'];
+  cylinderCapacity: VehiclePlateResponse['nrCilindrada'];
+  power: VehiclePlateResponse['nrPotencia'];
+  fuel: VehiclePlateResponse['dsCombustível'];
+  chassis: VehiclePlateResponse['dsChassi'];
+  engine: VehiclePlateResponse['dsMotor'];
+  seats: VehiclePlateResponse['nrPassageiros'];
+  state: VehiclePlateResponse['dsUf'];
+  model: VehiclePlateResponse['dsModelo'];
+};

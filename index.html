@@ -1,0 +1,55 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <link rel="icon" href="/favicon.ico" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Alfa-B2B</title>
+    <link rel="stylesheet" type="text/css" href="/loader.css" />
+    <link
+      rel="stylesheet"
+      href="https://cdn.jsdelivr.net/npm/@mdi/font@7.2.96/css/materialdesignicons.min.css"
+    />
+
+    <link rel="apple-touch-icon" sizes="180x180" href="/apple-touch-icon.png" />
+    <link rel="icon" type="image/png" sizes="32x32" href="/favicon-32x32.png" />
+    <link rel="icon" type="image/png" sizes="16x16" href="/favicon-16x16.png" />
+    <!-- <link rel="manifest" href="/manifest.webmanifest.json" /> -->
+    <link rel="mask-icon" href="/safari-pinned-tab.svg" color="#5bbad5" />
+    <meta name="msapplication-TileColor" content="#2b5797" />
+    <meta name="theme-color" content="#ffffff" />
+  </head>
+
+  <body>
+    <div id="app">
+      <div id="loading-bg">
+        <div class="loading-logo">
+          <img src="/logo1.png" style="width: 15.625rem" alt="Logo" />
+        </div>
+        <div class="loading">
+          <div class="effect-1 effects"></div>
+          <div class="effect-2 effects"></div>
+          <div class="effect-3 effects"></div>
+        </div>
+      </div>
+    </div>
+    <script type="module" src="/src/main.ts"></script>
+    <script>
+      const loaderColor =
+        localStorage.getItem('Vuexy-initial-loader-bg') || '#FFFFFF';
+      const primaryColor =
+        localStorage.getItem('Vuexy-initial-loader-color') || '#7367F0';
+
+      if (loaderColor)
+        document.documentElement.style.setProperty(
+          '--initial-loader-bg',
+          loaderColor,
+        );
+      if (primaryColor)
+        document.documentElement.style.setProperty(
+          '--initial-loader-color',
+          primaryColor,
+        );
+    </script>
+  </body>
+</html>
