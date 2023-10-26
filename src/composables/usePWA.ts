@@ -22,13 +22,13 @@ export const usePWA = () => {
   const getCameraAccess = async () => {
     console.log(navigator);
     console.log(navigator.mediaDevices.getSupportedConstraints());
-    // stream.value = await navigator.mediaDevices.getUserMedia({
-    //   video: true,
-    //   audio: false,
-    // });
-    // const videoTracks = stream.value.getVideoTracks();
+    stream.value = await navigator.mediaDevices.getUserMedia({
+      video: true,
+      audio: false,
+    });
+    const videoTracks = stream.value.getVideoTracks();
 
-    // console.log({ stream, videoTracks });
+    console.log({ stream, videoTracks });
   };
 
   onMounted(() => {
