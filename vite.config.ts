@@ -20,7 +20,15 @@ export default defineConfig({
     vueJsx(),
     VitePWA({
       registerType: 'autoUpdate',
-      includeAssets: ['favicon.ico', 'apple-touch-icon.png', 'masked-icon.svg'],
+      includeAssets: [
+        'favicon.ico',
+        'apple-touch-icon.png',
+        'safari-pinned-tab.svg',
+        'android-chrome-192x192.png',
+        'android-chrome-512x512.png',
+        'favicon-16x16.png',
+        'favicon-32x32.png',
+      ],
 
       devOptions: {
         enabled: true,
