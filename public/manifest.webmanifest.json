@@ -13,6 +13,21 @@
       "type": "image/png"
     },
     {
+      "src": "/favicon-16x-16.png",
+      "sizes": "16x16",
+      "type": "image/png"
+    },
+    {
+      "src": "/mstile-150x-150.png",
+      "sizes": "150x150",
+      "type": "image/png"
+    },
+    {
+      "src": "/favicon-32x-32.png",
+      "sizes": "32x32",
+      "type": "image/png"
+    },
+    {
       "src": "/safari-pinned-tab.svg",
       "sizes": "192x192",
       "type": "image/png",
