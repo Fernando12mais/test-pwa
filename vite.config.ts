@@ -11,7 +11,50 @@ import Layouts from 'vite-plugin-vue-layouts';
 import vuetify from 'vite-plugin-vuetify';
 import { unheadVueComposablesImports } from '@unhead/vue';
 import { VitePWA } from 'vite-plugin-pwa';
-import manifest from './public/manifest.webmanifest.json';
+const manifest = {
+  name: 'Alfa B2B',
+  short_name: 'B2B',
+  icons: [
+    {
+      src: '/android-chrome-192x192.png',
+      sizes: '192x192',
+      type: 'image/png',
+      purpose: 'maskable',
+    },
+    {
+      src: '/android-chrome-512x512.png',
+      sizes: '512x512',
+      type: 'image/png',
+      purpose: 'maskable',
+    },
+    {
+      src: '/favicon-16x-16.png',
+      sizes: '16x16',
+      type: 'image/png',
+    },
+    {
+      src: '/favicon.ico',
+      sizes: '16x16',
+      type: 'image/ico',
+    },
+    {
+      src: '/favicon-32x-32.png',
+      sizes: '32x32',
+      type: 'image/png',
+    },
+    {
+      src: '/safari-pinned-tab.svg',
+      sizes: '192x192',
+      type: 'image/png',
+      purpose: 'maskable',
+      color: '#5bbad5',
+    },
+  ],
+  theme_color: '#ffffff',
+  background_color: '#ffffff',
+  display: 'standalone',
+  start_url: '/',
+};
 
 // https://vitejs.dev/config/
 export default defineConfig({
